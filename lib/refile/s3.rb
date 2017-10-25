@@ -61,10 +61,8 @@ module Refile
       id = @hasher.hash(uploadable)
 
       if uploadable.is_a?(Refile::File) and uploadable.backend.is_a?(S3) and uploadable.backend.access_key_id == access_key_id
-        puts 'copy_fromming'
         object(id).copy_from(copy_source: [@bucket_name, uploadable.backend.object(uploadable.id).key].join("/"))
       else
-        puts 'putting'
         object(id).put(body: uploadable, content_length: uploadable.size)
       end
 
@@ -149,7 +147,7 @@ module Refile
       id = RandomHasher.new.hash
       signature = @bucket.presigned_post(key: [*@prefix, id].join("/"))
       signature.content_length_range(0..@max_size) if @max_size
-      Signature.new(as: "file", id: id, url: signature.url.to_s, fields: signature.fields)
+      Signature.new(as: "file", id: id, url: signature.url.to_s, fields: signature.fields.merge('x-amz-server-side-encryption': 'AES256'))
     end
 
     verify_id def object(id)
