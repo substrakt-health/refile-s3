@@ -145,7 +145,7 @@ module Refile
     # @return [Refile::Signature]
     def presign
       id = RandomHasher.new.hash
-      signature = @bucket.presigned_post(key: [*@prefix, id].join("/"))
+      signature = @bucket.presigned_post(key: [*@prefix, id].join("/"), server_side_encryption: 'AES256')
       signature.content_length_range(0..@max_size) if @max_size
       Signature.new(as: "file", id: id, url: signature.url.to_s, fields: signature.fields.merge('x-amz-server-side-encryption': 'AES256'))
     end
